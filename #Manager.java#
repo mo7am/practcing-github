@@ -1,0 +1,197 @@
+package sw;
+
+import sw.Connect;
+import java.sql.Array;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+/**
+ *
+ * @author emad
+ */
+public class Manager extends Employee implements Search {
+
+    public Manager() {
+    }
+
+    boolean AddEmployee(Employee employee) throws SQLException {
+        Connection con = null;
+        con = Connect.connect();
+        ResultSet result = null;
+        PreparedStatement pat = null;
+        String query = "SELECT *FROM BRANCH where BRANCH_ID=" + "" + employee.Branchid + "";
+        pat = con.prepareStatement(query);
+        result = pat.executeQuery();
+        int NumberOfRows = 0;
+        if (result.next()) {
+            NumberOfRows++;
+        }
+        if (NumberOfRows == 0) {
+            return false;
+        } else {
+            query = "INSERT INTO employee (F_NAME,L_NAME,SSN,EMP_ID,EMAIL,PASSWORD,SALARY,AGE,BIRTHDATE,Gender,Date_of_appointment,BRANCH_ID,Phone,Address,SPECIALIZATION,Quality,work_hours,account_block) values ('" + employee.Fname + "','" + employee.Lname + "','" + employee.Ssn + "','" + employee.ID + "','" + employee.Email + "','" + employee.Password + "','" + employee.Salary + "','" + employee.Age + "','" + employee.Bearthdate + "','" + employee.Gender + "','" + employee.Dateapointment + "','" + employee.Branchid + "','" + employee.Phone + "','" + employee.Address + "','" + employee.Spetiolization + "','" + employee.Quality + "','" + employee.Workhours + "','" + 1 + "')";
+            pat = con.prepareStatement(query);
+            try {
+                pat.execute();
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    Employee SearchEmployee(int EmployeeID) throws SQLException {
+        Connection con = null;
+        con = Connect.connect();
+        ResultSet result = null;
+        PreparedStatement pat = null;
+
+        Employee E = new Employee();
+        String query1 = "select *from employee where EMP_ID=" + "" + EmployeeID + "";
+        String query2 = "select *from technical_region where emp_ID=" + " " + EmployeeID + "";
+        pat = con.prepareStatement(query1);
+        result = pat.executeQuery();
+        if (result != null) {
+            while (result.next()) {
+                E.Fname = result.getString("F_name");
+                E.Lname = result.getString("L_name");
+                E.Ssn = result.getInt("SSN");
+                E.Email = result.getString("Email");
+                E.Password = result.getString("Password");
+                E.Salary = result.getDouble("Salary");
+                E.Age = result.getInt("Age");
+                E.Bearthdate = result.getString("BIRTHDATE");
+                E.Gender = result.getString("Gender");
+                E.Dateapointment = result.getString("Date_of_appointment");
+                E.Branchid = result.getInt("BRANCH_ID");
+                E.Spetiolization = result.getString("SPECIALIZATION");
+                E.Quality = result.getInt("Quality");
+                E.Workhours = result.getInt("work_hours");
+                E.Accountblock = result.getBoolean("account_block");
+                E.Phone = result.getString("phone");
+                E.Address = result.getString("Address");
+            }
+            /* while (result3.next()) {
+                MainMessage M = new MainMessage();
+                M.ID = result3.getInt("message_id");
+                M.Content = result3.getString("content");
+                M.MessageState = result3.getString("state");
+                E.message.add(M);
+            }
+            String query5 = "select *from Branch where Branch_ID=" + " " + E.MyBranch.ID + "";
+            pat = con.prepareStatement(query5);
+            result4 = pat.executeQuery();
+            while (result4.next()) {
+                E.MyBranch.Location = result.getString("Branch_Location");
+                E.MyBranch.Phone = result.getString("Phone_Number");
+                E.MyBranch.MyManagerID = result.getInt("MANAGER_ID");
+            }*/
+            return E;
+        }
+
+        return null;
+    }
+
+    Boolean DeleteEmployee(int EmployeeID) {
+        return true;
+    }
+
+    double BranchQuality() throws SQLException {
+        Connection con = null;
+        con = Connect.connect();
+        ResultSet result = null;
+        PreparedStatement pat = null;
+        int TotalQuality = 0;
+        int Counter_Rows = 0;
+        int Persant;
+        String Query = "select *from Employee";
+        pat = con.prepareStatement(Query);
+        result = pat.executeQuery();
+        while (result.next()) {
+            TotalQuality += result.getInt("Quality");
+            Counter_Rows++;
+        }
+        Persant = TotalQuality / (Counter_Rows * 100) * 100;
+        return Persant;
+    }
+
+    void Block(int Emp_id) throws SQLException {
+        Connection con = null;
+        con = Connect.connect();
+        ResultSet result = null;
+        PreparedStatement pat = null;
+        String Query = "update Employee set Account_Block where Emp_id=" + " " + Emp_id + "";
+        pat = con.prepareStatement(Query);
+        result = pat.executeQuery();
+    }
+
+    void UnBlock(int Emp_id) {
+    }
+
+    Customer SearchCustomer(int ID) throws SQLException {
+        Connection con = null;
+        con = Connect.connect();
+        ResultSet result = null;
+        PreparedStatement pat = null;
+        Customer C = new Customer();
+        String Query = "select *from Customer where Cust_ID=" + " " + ID + "";
+        pat = con.prepareStatement(Query);
+        result = pat.executeQuery();
+        while (result.next()) {
+            C.ID = result.getInt("CUST_ID");
+            C.Fname = result.getString("F_NAME");
+            C.Lname = result.getString("L_name");
+            C.Email = result.getString("MAIL");
+            C.Password = result.getString("PASSWORD");
+            C.Address = result.getString("ADDRESS");
+            C.Phone = result.getString("Phone");
+            C.SecurityQuestion = result.getString("QUESTION_NUMBER");
+            C.SecurityQuestionAnwer = result.getString("QUESTION_NUMBER");
+            return C;
+        }
+        return null;
+    }
+
+    void SendMessageToEmployee(EmployeeMessage Message, int EmployeeID) throws SQLException {
+    }
+
+    @Override
+    public int SearchOrder(int OrderID) {
+        return 0;
+    }
+
+    @Override
+    public boolean SendMessageToCustomer(int CustomerID, EmployeeMessage Message)
+    {
+        Connection con = null;
+        ResultSet result = null;
+        PreparedStatement pat = null;
+        int NumberOfRows=0;
+        String query = "SELECT * FROM CUSTOMER WHERE CUST_ID=" + "" + CustomerID + " ";
+        try {
+            pat=con.prepareStatement(query);
+             result=pat.executeQuery();
+            while(result.next())
+            {
+            NumberOfRows++;
+            }
+            if(NumberOfRows==0) return false;
+            query = "INSERT INTO message (MESSAGE_ID,SENDER_ID,CONTENT,STATE,RECIVER_ID,DATE) values('" + Message.ID + "','" + Message.Sender + "','" + Message.Content + "','" + Message.MessageState + "','" + CustomerID + "','" + Message.Date + "')";
+            pat = con.prepareStatement(query);
+            pat.execute();
+        } catch (SQLException ex) {
+            return false;
+        }
+
+        return true;
+    }
+}
